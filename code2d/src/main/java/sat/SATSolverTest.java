@@ -22,9 +22,12 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.util.Arrays;
+import java.util.Iterator;
 
 import immutable.EmptyImList;
 import immutable.ImList;
+import immutable.ImListIterator;
+import immutable.NonEmptyImList;
 import sat.env.*;
 import sat.formula.*;
 
@@ -40,8 +43,7 @@ public class SATSolverTest {
     // https://people.sc.fsu.edu/~jburkardt/data/cnf/cnf.html
 
 
-	
-	// TODO: add the main method that reads the .cnf file and calls SATSolver.solve to determine the satisfiability
+    // TODO: add the main method that reads the .cnf file and calls SATSolver.solve to determine the satisfiability
 //    public static void main(String[] args) {
 ////        String filepath = args[0];
 //        String filepath = "/Users/kellie/Documents/50.001/2DProject/code2d/src/main/java/sat/s8Sat.cnf";
@@ -160,19 +162,52 @@ public class SATSolverTest {
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
             while (reader.ready()) {
                 String line = reader.readLine();
-                System.out.println(line);
-                line = line.trim();
-                while (line.length() >= 1) {
+//                System.out.println(line);
+//                line = line.trim();
+
+                if (line.length() >= 1) {
                     char firstChar = line.charAt(0);
-                    if (firstChar == '-' || (firstChar >= 0 && firstChar <= 9)) {
-                        // form a new literal
-                        // add literal to list of literals
-                        // form clause using makeCl
-                        // add clause to list of clauses
+                    if (firstChar == '-' || (firstChar >= '0' && firstChar <= '9')) {
+                        /* pseudocode
+                         form a new literal
+                         add literal to list of literals
+                         form clause using makeCl after the line ends (aka when 0 is detected)
+                         add clause to list of clauses
+                        */
+
+                        // split string by space
+                        String[] splitLine = line.split(" ");
+                        int i = 0;
+
+                        // declare list of literals
+                        Literal[] literals = new Literal[splitLine.length];
+
+                        // for each item in the line (eg: -3, -4)
+                        for (String item : splitLine) {
+//                            System.out.println(item);
+                            // negative literal obtained
+                            if (item.charAt(0) == '-') {
+                                // start after the negative sign
+                                Variable variable = new Variable(item.substring(1));
+                                Literal literal = NegLiteral.make(variable);
+                                literals[i] = literal;
+
+                            } else if (item.charAt(0) != '0') {
+                                Variable variable = new Variable(item);
+                                Literal literal = PosLiteral.make(variable);
+                                literals[i] = literal;
+
+                            }
+                            i += 1;
+                        }
+                        System.out.println(Arrays.toString(literals));
+
+                        // TODO: figure out how to make formula and make clause
+//                        SATSolver.solve(makeFm(makeCl(literals)));
+
+                    }
+                    // else if first char is p or c, then do something else - not sure if necessary
                 }
-                    // else if first char is p or c, then do something else
-                }
-                // makeFm at the end of the line by using the list of clauses (eg: when 0 is detected)
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -180,26 +215,26 @@ public class SATSolverTest {
 
     }
 
-    public void testSATSolver1(){
-    	// (a v b)
-    	Environment e = SATSolver.solve(makeFm(makeCl(a,b))	);
+    public void testSATSolver1() {
+        // (a v b)
+        Environment e = SATSolver.solve(makeFm(makeCl(a, b)));
 /*
     	assertTrue( "one of the literals should be set to true",
-    			Bool.TRUE == e.get(a.getVariable())  
+    			Bool.TRUE == e.get(a.getVariable())
     			|| Bool.TRUE == e.get(b.getVariable())	);
-    	
-*/    	
+
+*/
     }
-    
-    
-    public void testSATSolver2(){
-    	// (~a)
-    	Environment e = SATSolver.solve(makeFm(makeCl(na)));
+
+
+    public void testSATSolver2() {
+        // (~a)
+        Environment e = SATSolver.solve(makeFm(makeCl(na)));
 /*
     	assertEquals( Bool.FALSE, e.get(na.getVariable()));
-*/    	
+*/
     }
-    
+
     private static Formula makeFm(Clause... e) {
         Formula f = new Formula();
         for (Clause c : e) {
@@ -207,7 +242,7 @@ public class SATSolverTest {
         }
         return f;
     }
-    
+
     private static Clause makeCl(Literal... e) {
         Clause c = new Clause();
         for (Literal l : e) {
@@ -215,7 +250,6 @@ public class SATSolverTest {
         }
         return c;
     }
-    
-    
-    
+
+
 }
