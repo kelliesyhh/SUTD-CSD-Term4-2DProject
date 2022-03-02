@@ -21,8 +21,11 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
+import java.text.ParseException;
 import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedList;
 
 import immutable.EmptyImList;
 import immutable.ImList;
@@ -151,64 +154,59 @@ public class SATSolverTest {
 
     public static void main(String[] args) {
 //        String filepath = args[0];
-        String filepath = "/Users/kellie/Documents/50.001/2DProject/code2d/src/main/java/sat/s8Sat.cnf";
-        System.out.println(filepath);
-        InputStream inputStream = null;
+        String filepath = "C:\\Users\\Razer\\OneDrive - Singapore University of Technology and Design\\SUTD\\Y1\\Term 4\\50.002 Computation Structures\\2D\\50001_Project-2D-starting\\sampleCNF\\s8Sat.cnf";
+
         try {
-            inputStream = new FileInputStream(filepath);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
-            while (reader.ready()) {
-                String line = reader.readLine();
-//                System.out.println(line);
-//                line = line.trim();
+            InputStream inputStream = new FileInputStream(filepath);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
 
-                if (line.length() >= 1) {
-                    char firstChar = line.charAt(0);
-                    if (firstChar == '-' || (firstChar >= '0' && firstChar <= '9')) {
-                        /* pseudocode
-                         form a new literal
-                         add literal to list of literals
-                         form clause using makeCl after the line ends (aka when 0 is detected)
-                         add clause to list of clauses
-                        */
+            // clauses LL stores our clauses parsed from the file
+            LinkedList<Clause> clauses = new LinkedList<>();
 
-                        // split string by space
-                        String[] splitLine = line.split(" ");
-                        int i = 0;
+            // literals stores each literal until we hit a EOL character '0', then it is
+            // added to a Clause, and added to clauses LL
+            LinkedList<Literal> literals = new LinkedList<>();
 
-                        // declare list of literals
-                        Literal[] literals = new Literal[splitLine.length];
+            // Stores the current line we are looking at
+            String line;
 
-                        // for each item in the line (eg: -3, -4)
-                        for (String item : splitLine) {
-//                            System.out.println(item);
-                            // negative literal obtained
-                            if (item.charAt(0) == '-') {
-                                // start after the negative sign
-                                Variable variable = new Variable(item.substring(1));
-                                Literal literal = NegLiteral.make(variable);
-                                literals[i] = literal;
+            // Used to store the literals in our literals LL once we hit a EOL char
+            Clause currentClause = new Clause();
 
-                            } else if (item.charAt(0) != '0') {
-                                Variable variable = new Variable(item);
-                                Literal literal = PosLiteral.make(variable);
-                                literals[i] = literal;
+            // Read until EOF
+            while ((line = reader.readLine()) != null) {
+                // Check that the line is a valid clause (not empty, not problem statement, not comment)
+                if (line.length() > 0 && line.charAt(0) != 'p' && line.charAt(0) != 'c') {
+                    // Remove any potential extra whitespace and split
+                    String[] splitLine = line.trim().split(" ");
 
+                    /*
+                    - If the item has a 0, we consider it as EOL, and purge our literals LL to a clause
+                    - Else if the item starts with a 0, we add a negative literal named after that term
+                    - Else we add a positive literal named after that term
+                     */
+                    for (String item : splitLine) {
+                        char i = item.charAt(0);
+                        if (i == '0') {
+                            for (Literal l : literals) {
+                                currentClause = currentClause.add(l);   // Add all our temporary literals to our clause
                             }
-                            i += 1;
+                            clauses.add(currentClause);     // Add the clause to our list of clauses
+                            currentClause = new Clause();   // Reset the clause for the next set of literals
+                            literals.clear();               // Reset the literals LL for the next set of literals
+                        } else if (i == '-') {
+                            literals.add(NegLiteral.make(item.substring(1)));
+                        } else {
+                            literals.add(PosLiteral.make(item));
                         }
-                        System.out.println(Arrays.toString(literals));
-
-                        // TODO: figure out how to make formula and make clause
-//                        SATSolver.solve(makeFm(makeCl(literals)));
-
                     }
-                    // else if first char is p or c, then do something else - not sure if necessary
                 }
             }
+
+            Clause[] temp = clauses.toArray(new Clause[0]); // Convert to standard array to use makeFm
+            Formula fm = makeFm(temp);
+            System.out.println(fm);
+//            SATSolver.solve(fm);
         } catch (IOException e) {
             e.printStackTrace();
         }
