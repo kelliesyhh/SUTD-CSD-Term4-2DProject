@@ -2,7 +2,6 @@ package sat;
 
 /*
 import static org.junit.Assert.*;
-
 import org.junit.Test;
 */
 
@@ -154,7 +153,7 @@ public class SATSolverTest {
 
     public static void main(String[] args) {
 //        String filepath = args[0];
-        String filepath = "C:\\Users\\Razer\\OneDrive - Singapore University of Technology and Design\\SUTD\\Y1\\Term 4\\50.002 Computation Structures\\2D\\50001_Project-2D-starting\\sampleCNF\\s8Sat.cnf";
+        String filepath = "C:\\Users\\Siyang\\OneDrive - Singapore University of Technology and Design\\Sophomore Term 4\\2D\\Info Sys\\50001_Project-2D-starting\\sampleCNF\\largeUnsat.cnf";
 
         try {
             InputStream inputStream = new FileInputStream(filepath);
@@ -206,7 +205,19 @@ public class SATSolverTest {
             Clause[] temp = clauses.toArray(new Clause[0]); // Convert to standard array to use makeFm
             Formula fm = makeFm(temp);
             System.out.println(fm);
-//            SATSolver.solve(fm);
+
+            long started = System.nanoTime();
+            Environment e = SATSolver.solve(fm);
+            long time = System.nanoTime();
+
+            if (e == null) {
+                System.out.println("Unsatisfiable");
+            } else {
+                System.out.println("Satisfiable");
+            }
+
+            long timeTaken= time - started; System.out.println("Time:" + timeTaken/1000000.0 + "ms");
+
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -220,7 +231,6 @@ public class SATSolverTest {
     	assertTrue( "one of the literals should be set to true",
     			Bool.TRUE == e.get(a.getVariable())
     			|| Bool.TRUE == e.get(b.getVariable())	);
-
 */
     }
 
