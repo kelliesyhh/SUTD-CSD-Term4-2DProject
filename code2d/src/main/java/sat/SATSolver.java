@@ -21,11 +21,6 @@ public class SATSolver {
      *         null if no such environment exists.
      */
     public static Environment solve(Formula formula) {
-        // TODO: implement this.
-        //overall function
-        //convert formula into a set of clauses?
-
-        //by Kellie
         System.out.println("SAT solver starts!!!");
 
         Environment environment = new Environment();
@@ -34,7 +29,6 @@ public class SATSolver {
         solve(clauses, environment);
 
         return environment;
-        //throw new RuntimeException("not yet implemented.");
     }
 
     /**
@@ -50,35 +44,33 @@ public class SATSolver {
      *         or null if no such environment exists.
      */
     private static Environment solve(ImList<Clause> clauses, Environment env) {
-        // TODO: implement this.
         if (clauses.isEmpty()){
             return env;
         } else {
             //check if got empty clause in list of clauses
-            Clause shortestclause = clauses.first();
+            Clause shortestClause = clauses.first();
             for (Clause clause : clauses){
                 if (clause.isEmpty()){
                     return null;
                 } else { //shun bian identify the shortest clause for the recursive part later
-                    if (clause.size() < shortestclause.size()){
-                        shortestclause = clause;
+                    if (clause.size() < shortestClause.size()){
+                        shortestClause = clause;
                     }
                 }
             }
             //the recursive code starts here
-            Literal l = shortestclause.chooseLiteral();
-            env.putTrue(l.getVariable());
+            Literal l = shortestClause.chooseLiteral();
+            env = env.putTrue(l.getVariable());
             clauses = SATSolver.substitute(clauses,l);
             Environment result = solve(clauses, env);
-            if (result == null){
-                env.putFalse(l.getVariable());
+            if (result == null && shortestClause.size() > 1){
+                env = env.putFalse(l.getVariable());
                 clauses = SATSolver.substitute(clauses,l);
                 return solve(clauses, env);
             } else {
                 return result;
             }
         }
-        //throw new RuntimeException("not yet implemented.");
     }
 
     /**
@@ -93,17 +85,19 @@ public class SATSolver {
      */
     private static ImList<Clause> substitute(ImList<Clause> clauses,
             Literal l) {
-        // TODO: implement this.
         // for each clause in list, check if it contains literal
         // delete clause if literal be found
         ImList<Clause> newClauses = new EmptyImList<>();
         for (Clause clause : clauses) {
-            if (clause.contains(l) && clause.reduce(l) != null){
-                newClauses.add(clause.reduce(l));
+            if (clause.contains(l)){
+                if (clause.reduce(l) != null) {
+                    newClauses = newClauses.add(clause.reduce(l));
+                }
+            } else {
+                newClauses = newClauses.add(clause);
             }
         }
         return newClauses;
-        //throw new RuntimeException("not yet implemented.");
     }
 
 }
