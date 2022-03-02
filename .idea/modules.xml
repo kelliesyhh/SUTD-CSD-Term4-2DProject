@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/2DProject.iml" filepath="$PROJECT_DIR$/.idea/modules/2DProject.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/2DProject.app.iml" filepath="$PROJECT_DIR$/.idea/modules/app/2DProject.app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/code2d/2DProject.code2d.iml" filepath="$PROJECT_DIR$/.idea/modules/code2d/2DProject.code2d.iml" />
+    </modules>
+  </component>
+</project>
