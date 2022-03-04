@@ -46,7 +46,7 @@ public class SATSolverTest {
 
     public static void main(String[] args) {
 //        String filepath = args[0];
-        String filepath = "C:\\Users\\Razer\\OneDrive - Singapore University of Technology and Design\\SUTD\\Y1\\Term 4\\50.002 Computation Structures\\2D\\50001_Project-2D-starting\\sampleCNF\\RCAout.cnf";
+        String filepath = "C:\\Users\\Razer\\OneDrive - Singapore University of Technology and Design\\SUTD\\Y1\\Term 4\\50.002 Computation Structures\\2D\\50001_Project-2D-starting\\sampleCNF\\aim-50-2_0-yes1-1.cnf";
 
         try {
             InputStream inputStream = new FileInputStream(filepath);
@@ -82,10 +82,17 @@ public class SATSolverTest {
                         if (i == '0') {
                             for (Literal l : literals) {
                                 currentClause = currentClause.add(l);   // Add all our temporary literals to our clause
+
+                                // In case a and ~a are added, Clause returns null, so we have to handle this case
+                                if (currentClause == null) break;
                             }
-                            clauses.add(currentClause);     // Add the clause to our list of clauses
+                            if (currentClause != null) {
+                                clauses.add(currentClause);    // Add the clause to our list of clauses
+                            }
+
                             currentClause = new Clause();   // Reset the clause for the next set of literals
                             literals.clear();               // Reset the literals LL for the next set of literals
+
                         } else if (i == '-') {
                             literals.add(NegLiteral.make(item.substring(1)));
                         } else {
@@ -98,8 +105,6 @@ public class SATSolverTest {
             Clause[] temp = clauses.toArray(new Clause[0]); // Convert to standard array to use makeFm
 
             reader.close();
-            clauses = null;
-            literals = null;
 
             Formula fm = makeFm(temp);
             long started = System.nanoTime();

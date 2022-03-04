@@ -44,9 +44,7 @@ public class SATSolver {
         if (clauses.isEmpty()) {
             return env;
         } else {
-            if (clauses.first().isEmpty()) return null;
-
-            //check if got empty clause in list of clauses
+            //check for empty clause in list of clauses and find shortest clause
             Clause shortestClause = clauses.first();
 
             for (Clause clause : clauses) {
@@ -88,16 +86,14 @@ public class SATSolver {
             Literal l) {
 
         ImList<Clause> newClauses = new EmptyImList<>();
-//        System.out.println(l);
-//        System.out.println(clauses);
         // If the clause doesn't reduce to null (true), add it to our new clause list
+
         for (Clause clause : clauses) {
             if (clause.reduce(l) != null) {
                 newClauses = newClauses.add(clause.reduce(l));
             }
         }
-//        System.out.println(newClauses);
-//        System.out.println();
+
         return newClauses;
     }
 
