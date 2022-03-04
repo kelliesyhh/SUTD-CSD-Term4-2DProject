@@ -3,9 +3,7 @@ package sat;
 import immutable.EmptyImList;
 import immutable.ImList;
 import sat.env.Environment;
-import sat.formula.Clause;
-import sat.formula.Formula;
-import sat.formula.Literal;
+import sat.formula.*;
 
 /**
  * A simple DPLL SAT solver. See http://en.wikipedia.org/wiki/DPLL_algorithm
@@ -41,6 +39,8 @@ public class SATSolver {
      * or null if no such environment exists.
      */
     private static Environment solve(ImList<Clause> clauses, Environment env) {
+        //System.out.println(" ");
+        System.out.println(clauses.size());
         if (clauses.isEmpty()) {
             return env;
         } else {
@@ -57,15 +57,21 @@ public class SATSolver {
 
             // Pick any literal l and set it to true
             Literal l = shortestClause.chooseLiteral();
-            env = env.putTrue(l.getVariable());
-
-            // Evaluate the remainder of the clauses given that l is true
-            Environment result = solve(SATSolver.substitute(clauses, l), env);
-
-            if (result == null && shortestClause.size() > 1) {
-                // Set l to false and return whatever solution we get
-                env = env.putFalse(l.getVariable());
-                result = solve(SATSolver.substitute(clauses, l.getNegation()), env);
+            Environment result;
+            if (shortestClause.isUnit()) { //check if the clause has only 1 literal
+                if (l instanceof PosLiteral) {
+                    env = env.putTrue(l.getVariable());
+                } else {
+                    env = env.putFalse(l.getVariable());
+                }
+                result = solve(SATSolver.substitute(clauses, l), env);
+            } else { //set any random literal to be true first
+                env = env.putTrue(l.getVariable());
+                result = solve(SATSolver.substitute(clauses, l), env);
+                if (result.equals(null)) { //if your previous guess of literal's value == True was wrong, try literal's value = False
+                    env = env.putFalse(l.getVariable());
+                    result = solve(SATSolver.substitute(clauses, l.getNegation()), env);
+                }
             }
             return result;
         }
@@ -90,10 +96,12 @@ public class SATSolver {
 
         for (Clause clause : clauses) {
             if (clause.reduce(l) != null) {
+                //System.out.println(clause + " became " + clause.reduce(l));
                 newClauses = newClauses.add(clause.reduce(l));
+            } else {
+                //System.out.println("a null clause was found " + clause);
             }
         }
-
         return newClauses;
     }
 
