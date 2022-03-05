@@ -14,6 +14,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -32,6 +33,7 @@ import immutable.ImListIterator;
 import immutable.NonEmptyImList;
 import sat.env.*;
 import sat.formula.*;
+import sun.awt.image.ImageWatched;
 
 
 public class SATSolverTest {
@@ -45,8 +47,7 @@ public class SATSolverTest {
     // https://people.sc.fsu.edu/~jburkardt/data/cnf/cnf.html
 
     public static void main(String[] args) {
-//        String filepath = args[0];
-        String filepath = "C:\\Users\\Razer\\OneDrive - Singapore University of Technology and Design\\SUTD\\Y1\\Term 4\\50.002 Computation Structures\\2D\\50001_Project-2D-starting\\sampleCNF\\aim-50-2_0-yes1-1.cnf";
+        String filepath = args[0];
 
         try {
             InputStream inputStream = new FileInputStream(filepath);
@@ -93,9 +94,9 @@ public class SATSolverTest {
                             currentClause = new Clause();   // Reset the clause for the next set of literals
                             literals.clear();               // Reset the literals LL for the next set of literals
 
-                        } else if (i == '-') {
+                        } else if (i == '-') {  // Literal starts with -, treat it as a negative literal
                             literals.add(NegLiteral.make(item.substring(1)));
-                        } else {
+                        } else {                // Treat it as a positive literal
                             literals.add(PosLiteral.make(item));
                         }
                     }
@@ -115,14 +116,31 @@ public class SATSolverTest {
                 System.out.println("Unsatisfiable");
             } else {
                 System.out.println("Satisfiable");
+                writeToFile(e);
             }
 
-            long timeTaken= time - started; System.out.println("Time:" + timeTaken/1000000.0 + "ms");
+            long timeTaken = time - started; System.out.println("Time:" + timeTaken/1000000.0 + "ms");
 
         } catch (IOException e) {
             e.printStackTrace();
         }
 
+    }
+
+    private static void writeToFile(Environment env) {
+        // Use the string format of our env to write to our file
+        // Just gotta massage it a bit
+        String[] truncatedEnv = env.toString().substring(13, env.toString().length()-1).split(", ");
+
+        try {
+            FileWriter file = new FileWriter("BoolAssignment.txt");
+            for (String i : truncatedEnv) {
+                file.write(i.replaceAll("->", ":") + "\n");
+            }
+            file.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void testSATSolver1() {

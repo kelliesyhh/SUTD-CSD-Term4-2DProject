@@ -39,14 +39,13 @@ public class SATSolver {
      * or null if no such environment exists.
      */
     private static Environment solve(ImList<Clause> clauses, Environment env) {
-        //System.out.println(" ");
-        System.out.println(clauses.size());
         if (clauses.isEmpty()) {
             return env;
         } else {
             //check for empty clause in list of clauses and find shortest clause
             Clause shortestClause = clauses.first();
 
+            // Check for empty clauses as well as the shortest clause
             for (Clause clause : clauses) {
                 if (clause.isEmpty()) {
                     return null;
@@ -58,23 +57,41 @@ public class SATSolver {
             // Pick any literal l and set it to true
             Literal l = shortestClause.chooseLiteral();
             Environment result;
-            if (shortestClause.isUnit()) { //check if the clause has only 1 literal
-                if (l instanceof PosLiteral) {
-                    env = env.putTrue(l.getVariable());
-                } else {
-                    env = env.putFalse(l.getVariable());
-                }
+            if (shortestClause.isUnit()) { // Check if the clause has only 1 literal
+                env = set(env, l, true);
                 result = solve(SATSolver.substitute(clauses, l), env);
-            } else { //set any random literal to be true first
-                env = env.putTrue(l.getVariable());
+            } else { // Set any random literal to be true first
+                env = set(env, l, true);
                 result = solve(SATSolver.substitute(clauses, l), env);
-                if (result.equals(null)) { //if your previous guess of literal's value == True was wrong, try literal's value = False
-                    env = env.putFalse(l.getVariable());
+                if (result == null) { // If your previous guess of literal's value == True was wrong, try literal's value = False
+                    env = set(env, l, false);
                     result = solve(SATSolver.substitute(clauses, l.getNegation()), env);
                 }
             }
             return result;
         }
+    }
+
+    // Convenience method to neaten main solver code
+    private static Environment set(Environment env, Literal l, Boolean bool) {
+        if (l instanceof PosLiteral) {
+            // If l=x is PosLiteral, l.getVariable returns x
+            // Therefore we can set the underlying variable to T / F accordingly
+            if (bool) {
+                env = env.putTrue(l.getVariable());
+            } else {
+                env = env.putFalse(l.getVariable());
+            }
+        } else {
+            // But if l=~x is NegLiteral, l.getVariable returns x
+            // Therefore we have to set the variable to the opposite of the intended bool value
+            if (bool) {
+                env = env.putFalse(l.getVariable());
+            } else {
+                env = env.putTrue(l.getVariable());
+            }
+        }
+        return env;
     }
 
 
@@ -92,14 +109,12 @@ public class SATSolver {
             Literal l) {
 
         ImList<Clause> newClauses = new EmptyImList<>();
-        // If the clause doesn't reduce to null (true), add it to our new clause list
 
+        // If the clause doesn't reduce to null (true), add it to our new clause list
         for (Clause clause : clauses) {
             if (clause.reduce(l) != null) {
-                //System.out.println(clause + " became " + clause.reduce(l));
                 newClauses = newClauses.add(clause.reduce(l));
             } else {
-                //System.out.println("a null clause was found " + clause);
             }
         }
         return newClauses;
