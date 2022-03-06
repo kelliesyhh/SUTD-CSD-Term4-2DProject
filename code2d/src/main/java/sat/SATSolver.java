@@ -72,7 +72,17 @@ public class SATSolver {
         }
     }
 
-    // Convenience method to neaten main solver code
+    /**
+     * Convenience method to neaten main solver code
+     * @param env  assignment of some or all variables in clauses to true or
+     *             false values
+     * @param l    either an instance of PosLiteral or NegLiteral, contains an
+     *             underlying variable which will be binded to env
+     * @param bool object of the Boolean class, can either be True or False
+     * @return an environment where the underlying variable is set to Bool.TRUE or
+     * Bool.FALSE depending on whether l is an instance of PosLiteral or NegLiteral
+     */
+
     private static Environment set(Environment env, Literal l, Boolean bool) {
         if (l instanceof PosLiteral) {
             // If l=x is PosLiteral, l.getVariable returns x
@@ -107,14 +117,12 @@ public class SATSolver {
      */
     private static ImList<Clause> substitute(ImList<Clause> clauses,
             Literal l) {
-
         ImList<Clause> newClauses = new EmptyImList<>();
 
         // If the clause doesn't reduce to null (true), add it to our new clause list
         for (Clause clause : clauses) {
             if (clause.reduce(l) != null) {
                 newClauses = newClauses.add(clause.reduce(l));
-            } else {
             }
         }
         return newClauses;

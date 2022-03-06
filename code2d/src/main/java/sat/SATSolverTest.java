@@ -1,40 +1,20 @@
 package sat;
 
-/*
-import static org.junit.Assert.*;
-import org.junit.Test;
-*/
 
-
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
-import java.io.DataOutputStream;
-import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.PrintStream;
-import java.io.PrintWriter;
-import java.text.ParseException;
-import java.util.Arrays;
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.LinkedList;
 
-import immutable.EmptyImList;
-import immutable.ImList;
-import immutable.ImListIterator;
-import immutable.NonEmptyImList;
-import sat.env.*;
-import sat.formula.*;
-import sun.awt.image.ImageWatched;
-
+import sat.env.Environment;
+import sat.formula.Clause;
+import sat.formula.Formula;
+import sat.formula.Literal;
+import sat.formula.NegLiteral;
+import sat.formula.PosLiteral;
 
 public class SATSolverTest {
     Literal a = PosLiteral.make("a");
@@ -44,16 +24,16 @@ public class SATSolverTest {
     Literal nb = b.getNegation();
     Literal nc = c.getNegation();
 
-    // https://people.sc.fsu.edu/~jburkardt/data/cnf/cnf.html
-
     public static void main(String[] args) {
         String filepath = args[0];
 
         try {
+            // Read information in the file by using BufferedReader
             InputStream inputStream = new FileInputStream(filepath);
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
 
-            // clauses LL stores our clauses parsed from the file
+            // NOTE: start parsing process
+            // clauses LinkedList stores our clauses parsed from the file
             LinkedList<Clause> clauses = new LinkedList<>();
 
             // literals stores each literal until we hit a EOL character '0', then it is
@@ -105,7 +85,7 @@ public class SATSolverTest {
 
             Clause[] temp = clauses.toArray(new Clause[0]); // Convert to standard array to use makeFm
 
-            reader.close();
+            reader.close(); // Close BufferedReader stream and release all the system resources associated with the stream operations
 
             Formula fm = makeFm(temp);
             long started = System.nanoTime();
@@ -116,7 +96,7 @@ public class SATSolverTest {
                 System.out.println("Unsatisfiable");
             } else {
                 System.out.println("Satisfiable");
-                writeToFile(e);
+                writeToFile(e); // Call method to write result of solver to a txt file
             }
 
             long timeTaken = time - started; System.out.println("Time:" + timeTaken/1000000.0 + "ms");
@@ -127,9 +107,16 @@ public class SATSolverTest {
 
     }
 
+    /**
+     * Takes an Environment object and writes the assignment of variables to values
+     * bound to the env object to a txt file. The method does not return anything,
+     * but writes directly to the txt file.
+     *
+     * @param env assignment of some or all variables in clauses to true or
+     *            false values
+     */
     private static void writeToFile(Environment env) {
         // Use the string format of our env to write to our file
-        // Just gotta massage it a bit
         String[] truncatedEnv = env.toString().substring(13, env.toString().length()-1).split(", ");
 
         try {
