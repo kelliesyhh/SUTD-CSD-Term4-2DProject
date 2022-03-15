@@ -1,0 +1,11 @@
+c FILE: test
+c
+c SOURCE: WANG SIYANG
+c
+c NOTE: Not Satisfiable
+c
+p cnf 2 4
+1 2 0
+-1 2 0
+1 -2 0
+-1 -2 0
