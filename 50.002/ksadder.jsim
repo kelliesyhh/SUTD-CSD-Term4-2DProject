@@ -1,0 +1,160 @@
+.include "nominal.jsim"
+.include "stdcell.jsim"
+.include "2dcheckoff_3ns.jsim"
+
+* Inverter logic for faster gates
+* AND
+.subckt iland2 a b c
+Xi1 a ia inverter
+Xi2 b ib inverter
+Xn1 ia ib c nor2
+.ends
+
+* OR
+.subckt ilor2 a b c
+Xi1 a ia inverter
+Xi2 b ib inverter
+Xn1 ia ib c nand2
+.ends
+
+.subckt ilbuffer a c
+Xi1 a b inverter
+Xi2 b c inverter
+.ends
+
+.subckt ilor4 a b c d e
+Xi1 a ia inverter
+Xi2 b ib inverter
+Xi3 c ic inverter
+Xi4 d id inverter
+Xn1 ia ib ic id e nand4
+.ends
+
+* Group generate and propagate
+.subckt black g_n1 p_n1 g_n0 p_n0 g_n2 p_n2
+Xa1 p_n1 g_n0 g_n1 g_temp aoi21
+Xi1 g_temp g_n2 inverter
+Xa2 p_n1 p_n0 p_n2 iland2
+.ends
+
+.subckt grey g_n1 p_n1 g_n0 g_n2
+Xa1 p_n1 g_n0 g_n1 g_temp aoi21
+Xi1 g_temp g_n2 inverter
+.ends
+
+.subckt pggen a[31:0] b[31:0] p[31:0] g[31:0]
+Xgen  a[31:0] b[31:0] g[31:0] iland2
+Xprop a[31:0] b[31:0] p[31:0] xor2
+.ends
+
+.subckt FA1 a[32:1] b[32:1] cin out[31:0] co
+Xpg a[32:1] b[32:1] p0_[32:1] g0_[32:1] pggen
+.connect g0_0 cin
+.connect p0_0 cin
+
+Xblack0 g0_[32:2] p0_[32:2] g0_[31:1] p0_[31:1] g1_[32:2] p1_[32:2] black
+Xgrey0 g0_1 p0_1 g0_0 g1_1 grey
+
+Xblack1 g1_[32:4] p1_[32:4] g1_[30:2] p1_[30:2] g2_[32:4] p2_[32:4] black
+Xgrey1 g1_[3:2] p1_[3:2] g1_[1:0] g2_[3:2] grey
+
+Xblack2 g2_[32:8] p2_[32:8] g2_[28:4] p2_[28:4] g3_[32:8] p3_[32:8] black
+Xgrey2 g2_[7:4] p2_[7:4] g2_[3:0] g3_[7:4] grey
+
+Xblack3 g3_[32:16] p3_[32:16] g3_[24:8] p3_[24:8] g4_[32:16] p4_[32:16] black
+Xgrey3 g3_[15:8] p3_[15:8] g3_[7:0] g4_[15:8] grey
+
+Xgrey4 g4_[32:16] p4_[32:16] g4_[16:0] g5_[32:16] grey
+
+.connect g[0:5]_0
+
+.connect g[1:5]_1
+
+.connect g[2:5]_2
+.connect g[2:5]_3
+
+.connect g[3:5]_4
+.connect g[3:5]_5
+.connect g[3:5]_6
+.connect g[3:5]_7
+
+.connect g[4:5]_8
+.connect g[4:5]_9
+.connect g[4:5]_10
+.connect g[4:5]_11
+.connect g[4:5]_12
+.connect g[4:5]_13
+.connect g[4:5]_14
+.connect g[4:5]_15
+
+Xx1 p0_[32:1] g5_[31:0] out[31:0] xor2
+
+.connect co g5_32
+.ends
+
+.subckt FA2 a[32:1] b[32:1] cin out[31:0] co
+Xpg a[32:1] b[32:1] p0_[32:1] g0_[32:1] pggen
+.connect g0_0 cin
+.connect p0_0 cin
+
+Xblack0 g0_[32:2] p0_[32:2] g0_[31:1] p0_[31:1] g1_[32:2] p1_[32:2] black
+Xgrey0 g0_1 p0_1 g0_0 g1_1 grey
+Xbufg0 g0_0 g1_0 buffer
+
+Xblack1 g1_[32:4] p1_[32:4] g1_[30:2] p1_[30:2] g2_[32:4] p2_[32:4] black
+Xgrey1 g1_[3:2] p1_[3:2] g1_[1:0] g2_[3:2] grey
+Xbufg1 g1_1 g2_1 buffer
+
+Xblack2 g2_[32:8] p2_[32:8] g2_[28:4] p2_[28:4] g3_[32:8] p3_[32:8] black
+Xgrey2 g2_[7:4] p2_[7:4] g2_[3:0] g3_[7:4] grey
+Xbufg2 g2_[3:2] g3_[3:2] buffer
+
+Xblack3 g3_[32:16] p3_[32:16] g3_[24:8] p3_[24:8] g4_[32:16] p4_[32:16] black
+Xgrey3 g3_[15:8] p3_[15:8] g3_[7:0] g4_[15:8] grey
+Xbufg3 g3_[7:4] g4_[7:4] buffer
+
+Xgrey4 g4_[32:16] p4_[32:16] g4_[16:0] g5_[32:16] grey
+Xbufg4 g4_[15:8] g5_[15:8] buffer
+
+.connect g[1:5]_0
+
+.connect g[2:5]_1
+
+.connect g[3:5]_2
+.connect g[3:5]_3
+
+.connect g[4:5]_4
+.connect g[4:5]_5
+.connect g[4:5]_6
+.connect g[4:5]_7
+
+Xx1 p0_[32:1] g5_[31:0] out[31:0] xor2
+
+.connect co g5_32
+.ends
+
+.subckt adder32 ALUFN[0] a[31:0] b[31:0] s[31:0] z v n
+* BEGIN ANSWER
+Xinv32 b[31:0] ALUFN[0]#32 invb[31:0] xor2
+Xadd a[31:0] invb[31:0] ALUFN[0] s[31:0] co FA2
+
+* Compute z
+Xz1 s[31:16] s[15:0] z1out[15:0] nor2
+Xz2 z1out[15:8] z1out[7:0] z2out[7:0] nand2
+Xz3 z2out[7:4] z2out[3:0] z3out[3:0] nor2
+Xz4 z3out[3:2] z3out[1:0] z4out[1:0] nand2
+Xz5 z4out[1] z4out[0] z nor2
+
+* Compute v
+Xa1 invb[31] a[31] j iland2
+Xa2 j i l iland2
+Xa3 k s[31] m iland2
+
+Xn1 invb[31] a[31] k nor2
+Xo1 l m v ilor2
+Xi1 s[31] i inverter
+
+* Compute n
+.connect s[31] n
+* END ANSWER
+.ends
