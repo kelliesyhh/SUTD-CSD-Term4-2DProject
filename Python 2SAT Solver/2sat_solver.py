@@ -83,13 +83,12 @@ def dfs(graph, vertex, visited, ordered_vertices):
     ordered_vertices.insert(0, vertex)
 
 def transpose_dfs(graph, vertex, root, roots, scc):
-    # If root is not yet a key in scc, add it now
-    if root not in scc:
-        scc[root] = []
-    
     # If the vertex we are currently looking at doesn't yet have a root, set its root to the current root
     # and append to scc[root]
     if roots[vertex] is None:
+        # If root is not yet a key in scc, add it now
+        if root not in scc:
+            scc[root] = []
         roots[vertex] = root
         scc[root].append(vertex)
 
@@ -104,7 +103,6 @@ def boolsat(filename):
     # Call Kosaraju's algorithm on our graph to find our SCCs
     visited, ordered_vertices, roots, scc = kosaraju(adj_list, transpose_adj_list)
 
-    
     scc_adj_list = {}
     for i in scc:
         # Initialize the data structure we will use to store the adjacency list of the condensation of our implication graph
