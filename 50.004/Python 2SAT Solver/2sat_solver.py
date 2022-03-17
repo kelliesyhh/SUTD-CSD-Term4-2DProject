@@ -107,14 +107,14 @@ def boolsat(filename):
     for i in scc:
         # Initialize the data structure we will use to store the adjacency list of the condensation of our implication graph
         scc_adj_list[scc[i][0]] = set()
-        # We iterate through each SCC, and check for each literal in it, whether its negation is contained too
-        # If it is, then we know that our boolean formula is unsatisfiable
-        # Display result and return early
-        for var in scc[i]:
-            if -var in scc[i]:
-                print("UNSATISFIABLE")
-                return
-
+        
+    # We iterate through each variable, and check whether it and its negation shares a root vertex
+    # If it does, means that they are part of the same SCC, making the formula unsatisfiable; return
+    for var in vars:
+        if roots[var] == roots[-var]:
+            print("UNSATISFIABLE")
+            return
+            
     # If we passed the previous loop, it means our boolean formula is satisfiable; now we need to find the assignments
     print("SATISFIABLE")
 
