@@ -1,4 +1,5 @@
-# SUTD-CSD-Term4-2DProject
+# SUTD Term 4 - Computer Science and Design
+# 2D Project
 
 ## Topics
 * 50.001 Info Systems and Programming
